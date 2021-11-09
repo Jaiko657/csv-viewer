@@ -11,13 +11,40 @@ namespace CSV_Viewer
     {
         static void Main(string[] args)
         {
-           OpenFile();
+            if (args.Length == 0)
+            {
+                OpenFile();
+            }
+            else
+            {
+                if (args[0] == "-f")
+                {
+                    if (args.Length == 2)
+                    {
+                        OpenFile(args[1]);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Usage: -f \".\\csv file.csv\"");
+                    }
+                }
+            }
         }
 
-        static void OpenFile()
+        static string openFileMenu()
         {
             Console.WriteLine("Enter CSV File directory to open:");
             var Target = Console.ReadLine();
+            if (Target == null) { return ""; }
+            return Target;
+        }
+
+        static void OpenFile(string Target = "")
+        {
+            if (Target == "")
+            {
+                Target = openFileMenu();
+            }
             Console.Clear();
             var height = CountLinesInFile(Target);
 
