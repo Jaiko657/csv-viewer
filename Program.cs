@@ -18,20 +18,35 @@ namespace CSV_Viewer
         {
             Console.WriteLine("Enter CSV File directory to open:");
             var Target = Console.ReadLine();
-            string[][] table = new string[CountLinesInFile(Target)][];
+            Console.Clear();
+            var height = CountLinesInFile(Target);
+
+            //Declare array to store CSV in with correct height (needs height in initialise)
+            string[][] table = new string[height][];
+
             //file lines
             string[] lines = File.ReadAllLines(Target);
-            int i = 0;
+
             //loop through each file line
+            int i = 0;
+            int amountOfColumns = 0;
             foreach (string line in lines)
             {
                 string[] columns = line.Split(',');
+                if (amountOfColumns < columns.Length)
+                {
+                    amountOfColumns = columns.Length;
+                }
                 table[i] = columns;
                 i++;
             }
-            Console.Clear();
-            Console.WriteLine();
-            Print2DArray(table);
+            int[] columnWidths = new int[amountOfColumns];
+            for (int j = 0; j < amountOfColumns; j++)
+            {
+                columnWidths[j] = getColumnWidth(table, j);
+            }
+
+            Print2DArray(table, columnWidths);
             Console.WriteLine();
             Menu();
         }
@@ -52,53 +67,39 @@ namespace CSV_Viewer
                 }
                 if (key.Key == ConsoleKey.Q)
                 {
-                    //Environment.Exit(0);
+                    Environment.Exit(0);
                     break;
                 }
             }
         }
-        static public void Print2DArray(string[][] table)
+        static public void Print2DArray(string[][] table, int[] columnWidths)
         {
-            //Console.WriteLine(table[0][1]);
             foreach (string[] row in table)
             {
-                PrintRow(row);
-                PrintLine();
+                PrintRow(row, columnWidths);
+                PrintLine(columnWidths);
             }
         }
 
-        static int tableWidth = Console.WindowWidth-4;
-
-        static void PrintLine()
+        static void PrintLine(int[] columnWidths)
         {
-            Console.WriteLine(new string('-', tableWidth-7));
+            Console.WriteLine(new string('-', columnWidths.Sum() + 1 + (3 * columnWidths.Length)));
         }
 
-        static void PrintRow(params string[] columns)
+        static void PrintRow(string[] columns, int[] columnWidths)
         {
-            int width = (tableWidth - columns.Length) / columns.Length;
             string row = "|";
 
+            int count = 0;
             foreach (string column in columns)
             {
-                row += AlignCentre(column, width) + "|";
+                row += " " + CreateCell(column, columnWidths[count]) + " |";
+                count++;
             }
             Console.WriteLine(row);
         }
-        static int GetColumnWidth(string[][] table, int row)
-        {
-            int count = 0;
-            for (int i = 0; i < table.Length; i++)
-            {
-                Console.WriteLine(table[i][row]);
-                if (table[i][row].Length > count)
-                {
-                    count = table[i][row].Length;
-                }
-            }
-            return count;
-        }
-        static string AlignCentre(string text, int width)
+
+        static string CreateCell(string text, int width)
         {
             text = text.Length > width ? text.Substring(0, width - 3) + "..." : text;
 
@@ -110,6 +111,18 @@ namespace CSV_Viewer
             {
                 return text.PadRight(width - (width - text.Length) / 2).PadLeft(width);
             }
+        }
+        static int getColumnWidth(string[][] table, int row)
+        {
+            int count = 0;
+            for (int i = 0; i < table.Length; i++)
+            {
+                if (table[i][row].Length > count)
+                {
+                    count = table[i][row].Length;
+                }
+            }
+            return count;
         }
 
         public static void ClearCurrentConsoleLine()
@@ -136,3 +149,4 @@ namespace CSV_Viewer
         }
     }
 }
+
