@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace CSV_Viewer
 {
@@ -59,7 +54,24 @@ namespace CSV_Viewer
             int amountOfColumns = 0;
             foreach (string line in lines)
             {
-                string[] columns = line.Split(',');
+                string[] columns;
+                //(?<=\[)(.*?)(?=\])
+                if (!line.Contains('\"'))
+                {
+                    columns = line.Split(',');
+                }   
+                else
+                {
+                    //TODO: Get this cunt working
+                    columns = SplitCSV(line);
+                    for(int m = 0; m < columns.Length; m++)
+                    {
+                        if (columns[m] != "" && columns[m].Substring(0, 1) == "\"")
+                        {
+                            columns[m] = columns[m].Substring(1, columns[m].Length -2);
+                        }
+                    }
+                }
                 if (amountOfColumns < columns.Length)
                 {
                     amountOfColumns = columns.Length;
@@ -70,7 +82,7 @@ namespace CSV_Viewer
             int[] columnWidths = new int[amountOfColumns];
             for (int j = 0; j < amountOfColumns; j++)
             {
-                columnWidths[j] = getColumnWidth(table, j);
+                columnWidths[j] = GetColumnWidth(table, j);
             }
 
             Print2DArray(table, columnWidths);
@@ -87,7 +99,7 @@ namespace CSV_Viewer
             {
                 var key = System.Console.ReadKey(true);
                 if (key.Key == ConsoleKey.A)
-                { 
+                {
                     Console.Clear();
                     OpenFile();
                     break;
@@ -98,6 +110,27 @@ namespace CSV_Viewer
                     break;
                 }
             }
+        }
+
+        static Regex csvSplit = new Regex("(?:^|,)(\"(?:[^\"]+|\"\")*\"|[^,]*)", RegexOptions.Compiled);
+
+        public static string[] SplitCSV(string input)
+        {
+
+            List<string> list = new List<string>();
+            string curr = null;
+            foreach (Match match in csvSplit.Matches(input))
+            {
+                curr = match.Value;
+                if (0 == curr.Length)
+                {
+                    list.Add("");
+                }
+
+                list.Add(curr.TrimStart(','));
+            }
+
+            return list.ToArray();
         }
         static public void Print2DArray(string[][] table, int[] columnWidths)
         {
@@ -139,7 +172,7 @@ namespace CSV_Viewer
                 return text.PadRight(width - (width - text.Length) / 2).PadLeft(width);
             }
         }
-        static int getColumnWidth(string[][] table, int row)
+        static int GetColumnWidth(string[][] table, int row)
         {
             int count = 0;
             for (int i = 0; i < table.Length; i++)
