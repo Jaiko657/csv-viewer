@@ -11,6 +11,7 @@ namespace csv_viewer
 {
     internal class Program
     {
+        const int MAX_COL_WIDTH = 25; 
         static int Main(string[] args)
         {
             if(args.Length == 0)
@@ -24,26 +25,54 @@ namespace csv_viewer
             var (data, maxWidth) = parseCsv(filePath);
             if(data == null)
             {
-                Console.WriteLine("Invalid text file");
+                Console.WriteLine("Invalid file path");
                 return 2;
             }
 
             Console.WriteLine($"\t{maxWidth}rows x {data.Count()}cols");
-            printData(data);
+            var colWidths = getColWidths(data);
+            printData(data, colWidths);
             return 0;
         }
 
-        private static void printData(List<string[]> data)
+        private static void printData(List<string[]> data, List<int> colWidths)
         {
             for(int row = 0; row < data.Count; row++)
             {
-                Console.Write(row+1);
+                Console.Write(pad((row+1).ToString(), 3));
                 for(int col = 0; col < data[row].Length; col++)
                 {
-                    Console.Write("\t" + data[row][col]);
+                    Console.Write(pad(data[row][col], colWidths[col]));
                 }
                 Console.WriteLine();
             }
+        }
+
+        private static string pad(string str, int width)
+        {
+            string padding = new string(' ', 1+width-str.Length);
+            return str + padding;
+        }
+
+        private static List<int> getColWidths(List<string[]> data)
+        {
+            var widths = new List<int>();
+            for (int row = 0; row < data.Count; row++)
+            {
+                for (int col = 0; col < data[row].Length; col++)
+                {
+                    if(row == 0)
+                    {
+                        widths.Add(0);
+                    }
+                    int width = data[row][col].Length;
+                    if(width > widths[col])
+                    {
+                        widths[col] = width;
+                    }
+                }
+            }
+            return widths;
         }
 
         private static (List<string[]>?, int) parseCsv(string filePath)
