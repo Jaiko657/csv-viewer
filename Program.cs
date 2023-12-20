@@ -50,8 +50,17 @@ namespace csv_viewer
 
         private static string pad(string str, int width)
         {
+            if(width > MAX_COL_WIDTH+3)
+            {
+                width = MAX_COL_WIDTH+3;
+            }
+            if(str.Length > MAX_COL_WIDTH)
+            {
+                str = str.Substring(0, MAX_COL_WIDTH-1) + "...";
+            }
             string padding = new string(' ', 1+width-str.Length);
-            return str + padding;
+            var output = str + padding;
+            return output;
         }
 
         private static List<int> getColWidths(List<string[]> data)
