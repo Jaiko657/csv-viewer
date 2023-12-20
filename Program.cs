@@ -37,12 +37,12 @@ namespace csv_viewer
             return 0;
         }
 
-        private static void printData(List<string[]> data, List<int> colWidths)
+        private static void printData(List<List<string>> data, List<int> colWidths)
         {
             for(int row = 0; row < data.Count; row++)
             {
                 Console.Write(pad((row+1).ToString(), 3));
-                for(int col = 0; col < data[row].Length; col++)
+                for(int col = 0; col < data[row].Count; col++)
                 {
                     Console.Write(pad(data[row][col], colWidths[col]));
                 }
@@ -65,12 +65,12 @@ namespace csv_viewer
             return output;
         }
 
-        private static List<int> getColWidths(List<string[]> data)
+        private static List<int> getColWidths(List<List<string>> data)
         {
             var widths = new List<int>();
             for (int row = 0; row < data.Count; row++)
             {
-                for (int col = 0; col < data[row].Length; col++)
+                for (int col = 0; col < data[row].Count; col++)
                 {
                     if (col >= widths.Count)
                     {
@@ -86,25 +86,24 @@ namespace csv_viewer
             return widths;
         }
 
-        private static (List<string[]>?, int) parseCsv(string filePath)
+        private static (List<List<string>>?, int) parseCsv(string filePath)
         {
             if (!File.Exists(filePath)) return (null, -1);
 
-            var data = new List<string[]>();
+            var data = new List<List<string>>();
             using StreamReader r = new(filePath);
             string? line;
             int rowCount = 0;
             while ((line = r.ReadLine()) != null)
             {
-                //TODO(IMPROVEMENT): could be improved lol
-                string[] values = splitLine(line);
+                var values = splitLine(line);
 
                 data.Add(values);
-                if (values.Length > rowCount) rowCount = values.Length;
+                if (values.Count > rowCount) rowCount = values.Count;
             }
             return (data, rowCount);
         }
-        private static string[] splitLine(string line)
+        private static List<string> splitLine(string line)
         {
             var results = new List<string>();
             bool inQuotes = false;
@@ -131,7 +130,7 @@ namespace csv_viewer
             }
 
             results.Add(currentField);
-            return results.ToArray();
+            return results;
         }
     }
 }
