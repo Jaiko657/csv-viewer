@@ -5,6 +5,7 @@ using System.IO.Enumeration;
 using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 
@@ -105,7 +106,32 @@ namespace csv_viewer
         }
         private static string[] splitLine(string line)
         {
-            return line.Split(",");
+            var results = new List<string>();
+            bool inQuotes = false;
+            string currentField = "";
+
+            for (int i = 0; i < line.Length; i++)
+            {
+                char c = line[i];
+                if (c == '"' && (i == 0 || line[i - 1] != '\\'))
+                {
+                    inQuotes = !inQuotes;
+                    continue;
+                }
+
+                if (c == ',' && !inQuotes)
+                {
+                    results.Add(currentField);
+                    currentField = "";
+                }
+                else
+                {
+                    currentField += c;
+                }
+            }
+
+            results.Add(currentField);
+            return results.ToArray();
         }
     }
 }
