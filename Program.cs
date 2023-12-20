@@ -70,12 +70,12 @@ namespace csv_viewer
             {
                 for (int col = 0; col < data[row].Length; col++)
                 {
-                    if(row == 0)
+                    if (col >= widths.Count)
                     {
                         widths.Add(0);
                     }
                     int width = data[row][col].Length;
-                    if(width > widths[col])
+                    if (width > widths[col])
                     {
                         widths[col] = width;
                     }
