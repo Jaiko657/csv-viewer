@@ -7,6 +7,7 @@ using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace csv_viewer
 {
     internal class Program
@@ -22,14 +23,14 @@ namespace csv_viewer
 
             string filePath = "..\\..\\..\\" + args[0];
             if (!Debugger.IsAttached) filePath = args[0];
-            var (data, maxWidth) = parseCsv(filePath);
+            var (data, rowCount) = parseCsv(filePath);
             if(data == null)
             {
                 Console.WriteLine("Invalid file path");
                 return 2;
             }
 
-            Console.WriteLine($"\t{maxWidth}rows x {data.Count()}cols");
+            Console.WriteLine($"\t{rowCount}rows x {data.Count()}cols");
             var colWidths = getColWidths(data);
             printData(data, colWidths);
             return 0;
@@ -91,17 +92,20 @@ namespace csv_viewer
             var data = new List<string[]>();
             using StreamReader r = new(filePath);
             string? line;
-            int maxWidth = 0;
+            int rowCount = 0;
             while ((line = r.ReadLine()) != null)
             {
                 //TODO(IMPROVEMENT): could be improved lol
-                string[] values = line.Split(',');
+                string[] values = splitLine(line);
+
                 data.Add(values);
-                if (values.Length > maxWidth) maxWidth = values.Length;
+                if (values.Length > rowCount) rowCount = values.Length;
             }
-            return (data, maxWidth);
+            return (data, rowCount);
+        }
+        private static string[] splitLine(string line)
+        {
+            return line.Split(",");
         }
     }
-
-
 }
